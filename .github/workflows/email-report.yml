@@ -1,0 +1,29 @@
+name: Relatorio por email
+
+on:
+  workflow_run:
+    workflows: ['Build e Tests']
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  email:
+    name: Enviar relatorio da pipeline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # workflow_run utiliza codigo confiavel da branch padrao, nunca o do PR.
+      - name: Checkout do codigo confiavel
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Gerar e enviar relatorio por Gmail
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: python3 .github/scripts/send_pipeline_report.py

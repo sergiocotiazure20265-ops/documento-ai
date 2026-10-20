@@ -127,3 +127,12 @@ Ao concluir uma tarefa, marcar sua caixa e registrar: ID, entrega alterada, veri
 - `.github/workflows/pipeline.yml`: dois jobs em Ubuntu 24.04, com SDK .NET 10 e configuração Release. Tests depende de Build e executa a suíte xUnit sem OpenAI real.
 - Job de Deploy removido expressamente; não há autenticação, publicação ou alteração de recursos Azure. T27 e T29 permanecem abertas.
 - README atualizado para refletir os comandos e o escopo atual da pipeline.
+
+### Relatório de CI por e-mail — 20/10/2026
+
+- Solicitado envio para `sergio.coti@gmail.com` em cada execução; remetente confirmado pelo usuário como a mesma conta Gmail.
+- Etapa final em workflow de notificação separado, acionado na conclusão de Build e Tests por `workflow_run`, incluindo falhas e cancelamentos. Consulta os jobs da tentativa correta e lista cada passo, conclusão, duração, comandos e links dos logs.
+- Código confiável da branch padrão, token somente de leitura de Actions/Contents e envio via Gmail SMTP TLS, sem dependência de actions de e-mail externas.
+- Credencial necessária: Repository secret `SMTP_PASSWORD` com senha de app do Gmail. O envio real permanece dependente de seu cadastro e verificação; os testes não usam senha real nem enviam e-mails.
+- Quatro testes Python locais aprovados: resultados de execução/passos, ausência de credencial, transporte SMTP simulado e paginação por tentativa. A suíte passou a ser executada também no job Tests.
+- Deploy continua ausente e as tarefas de implementação da integração OpenAI permanecem abertas.

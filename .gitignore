@@ -34,3 +34,6 @@ coverage/
 # Sistema operacional
 Thumbs.db
 .DS_Store
+
+# Scripts auxiliares de CI
+**/__pycache__/

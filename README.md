@@ -127,8 +127,27 @@ O arquivo [pipeline.yml](.github/workflows/pipeline.yml) executa em push para `m
 
 1. **Build:** checkout, instalação do SDK .NET 10, `dotnet restore DocumentoAI.sln` e `dotnet build DocumentoAI.sln --configuration Release --no-restore`.
 2. **Tests:** aguarda Build, prepara um runner independente, restaura as dependências e executa `dotnet test DocumentoAI.sln --configuration Release --no-restore`, com compilação dos testes e logs detalhados.
+3. **Tests do relatório:** verifica geração de e-mail para sucesso/falha/cancelamento, paginação dos jobs e envio SMTP simulado, sem enviar mensagens reais nos testes.
 
 Os jobs utilizam Ubuntu 24.04, SDK `10.0.x` e token com permissão somente de leitura do conteúdo. Não há job de Deploy, autenticação no Azure ou publicação de recursos. A evolução para publicação real dependerá de autorização e incluirá validação do pacote, autenticação federada OIDC e configuração do ambiente conforme o SDD e as skills.
+
+### Relatório automático por e-mail
+
+O workflow [email-report.yml](.github/workflows/email-report.yml) é a etapa final de notificação: recebe o evento `workflow_run` quando **Build e Tests** termina, com sucesso, falha ou cancelamento. Também acompanha novas tentativas da execução e os eventos de push, pull request e acionamento manual cobertos pela pipeline. Seu gatilho observa somente Build e Tests, evitando notificações recursivas sobre o próprio envio.
+
+Remetente e destinatário: **sergio.coti@gmail.com**. O envio utiliza `smtp.gmail.com:465` com TLS validado. O corpo inclui resultado geral, workflow, repositório, evento, branch, commit, responsável, horários UTC, tentativa, resultado/duração de cada job e passo, comandos de restore/build/test e links dos logs. Passos ignorados e cancelados são identificados. Logs brutos e segredos não são enviados; a saída completa dos testes fica nos links da execução.
+
+Para ativar o envio:
+
+1. Na conta Google do remetente, habilitar a verificação em duas etapas e gerar uma [senha de app](https://support.google.com/mail/answer/185833?hl=pt-BR), se disponível para a conta.
+2. Em [Settings → Secrets and variables → Actions](https://github.com/sergiocotiazure20265-ops/documento-ai/settings/secrets/actions), criar o **Repository secret `SMTP_PASSWORD`** com essa senha de app. Não utilizar a senha comum da conta nem colocar a credencial em arquivos do repositório.
+3. Após a configuração e publicação dos workflows na branch padrão, executar novamente Build e Tests e verificar o job de notificação e a caixa de entrada (incluindo spam).
+
+O token automático do GitHub recebe `actions: read` apenas no workflow de notificação para consultar jobs da tentativa correta, com paginação. O código executado pelo notificador vem da branch padrão; código de PR e artefatos externos não são executados com acesso ao secret SMTP.
+
+Sem `SMTP_PASSWORD`, ou se o Gmail rejeitar a conexão/autenticação, a notificação falha explicitamente. O relatório gerado fica no Summary do job quando a consulta ao GitHub é bem-sucedida; o resultado original de Build/Tests permanece inalterado. O aceite SMTP é informado nos logs, mas não garante entrega na caixa de entrada. Não há garantia de envio se o próprio GitHub Actions, o workflow de notificação ou o serviço SMTP estiver indisponível/cancelado.
+
+O script usa somente a biblioteca padrão Python, já disponível no runner. Seus testes podem ser executados localmente com `python -m unittest discover -s .github/scripts/tests -v`. O envio real depende do secret e não faz parte desses testes.
 
 ## Desenvolvimento futuro
 

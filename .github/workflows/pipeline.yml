@@ -57,3 +57,7 @@ jobs:
 
       - name: Tests
         run: dotnet test DocumentoAI.sln --configuration Release --no-restore --logger "console;verbosity=normal"
+
+      - name: Tests do relatorio de email
+        if: ${{ !cancelled() }}
+        run: python3 -m unittest discover -s .github/scripts/tests -v

@@ -1,0 +1,38 @@
+name: Pipeline demonstrativo
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (demonstrativo)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Build
+        run: echo "Teste de build - compilacao real sera configurada futuramente."
+
+  test:
+    name: Test (demonstrativo)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Test
+        run: echo "Teste de pipeline - testes automatizados serao configurados futuramente."
+
+  deploy:
+    name: Deploy (demonstrativo)
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Deploy
+        run: echo "Teste de deploy - nenhuma publicacao ou alteracao no Azure sera realizada."

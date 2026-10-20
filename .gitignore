@@ -1,0 +1,36 @@
+# Visual Studio e arquivos locais de IDE
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Compilação, testes e publicação
+**/bin/
+**/obj/
+TestResults/
+**/TestResults/
+artifacts/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+*.log
+
+# Credenciais e configuração local
+.env
+.env.*
+!.env.example
+**/secrets.json
+**/appsettings.Local.json
+*.publishsettings
+*.pubxml.user
+*.pfx
+*.p12
+*.pem
+*.key
+
+# Sistema operacional
+Thumbs.db
+.DS_Store

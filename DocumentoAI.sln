@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.11918.235 insiders
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens de Solução", "{930089D1-A199-406E-9AE8-9A99A88C16F9}"
+	ProjectSection(SolutionItems) = preProject
+		AGENTS.md = AGENTS.md
+		docs\architecture.md = docs\architecture.md
+		docs\requirements.md = docs\requirements.md
+		.agents\skills\azure-deployment\SKILL.md = .agents\skills\azure-deployment\SKILL.md
+		docs\specifications.md = docs\specifications.md
+		docs\tasks.md = docs\tasks.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CEF65EEC-EA43-452C-91EE-1B4BD44B3F9A}
+	EndGlobalSection
+EndGlobal

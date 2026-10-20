@@ -2,7 +2,7 @@
 
 ## 1. Status e documentos de referência
 
-**Implementação não autorizada.** Este documento contém somente o planejamento. Nenhum projeto, código, teste executável ou configuração de publicação deve ser criado até autorização expressa do usuário.
+**Implementação parcial autorizada em 20/10/2026.** O usuário autorizou somente a estrutura dos cinco projetos .NET 10, suas referências, API baseada em Controllers, projeto xUnit e documentação web Scalar em Development e Production. Domínio, casos de uso, endpoints de negócio, integração OpenAI e deploy continuam fora desta autorização.
 
 Fontes do plano:
 
@@ -12,15 +12,15 @@ Fontes do plano:
 
 Para rotas e campos públicos, prevalece a especificação: `POST /api/documentos/analisar`, com `titulo` e `conteudo`, e resposta com `tipoDocumento`, `resumo`, `nivelRisco`, `palavrasChave` e `pontosAtencao`. O único outro endpoint previsto é `GET /health`.
 
-A solution `DocumentoAI.sln` já existe, sem os projetos previstos. Sua criação não será repetida nem considerada autorização para iniciar a implementação. Os projetos terão o prefixo `DocumentAI`.
+A solution `DocumentoAI.sln` foi preservada e agora contém os cinco projetos previstos, com prefixo `DocumentAI`, além dos itens de documentação existentes.
 
-Os ajustes documentais da revisão arquitetural foram autorizados e incorporados ao SDD. Essa autorização não libera a implementação da aplicação, não conclui T01 e não resolve os valores e escolhas ainda pendentes em DA-01 a DA-09.
+DA-01 foi aprovada para a estrutura solicitada. As decisões restantes da integração, limites e operação não são aprovadas por esta entrega. A autorização para Scalar em ambos os ambientes está registrada em T08A.
 
 ## 2. Regras de execução e conclusão
 
 As tarefas estão em ordem recomendada. A coluna de dependências contém pré-requisitos diretos; dependências transitivas também devem estar concluídas. Cada caixa representa a conclusão da tarefa inteira, não apenas seu início.
 
-Uma tarefa será concluída quando sua entrega existir, os critérios indicados tiverem sido verificados e a evidência estiver registrada. Compilação não substitui teste de comportamento, e testes com integração controlada não substituem homologação real. Nenhuma tarefa de implementação está marcada como concluída.
+Uma tarefa será concluída quando sua entrega existir, os critérios indicados tiverem sido verificados e a evidência estiver registrada. Compilação não substitui teste de comportamento, e testes com integração controlada não substituem homologação real. As tarefas concluídas abaixo se limitam à autorização desta etapa.
 
 As decisões da arquitetura serão resolvidas antes das tarefas afetadas, sem presumir aprovação pela existência deste plano. A autorização para iniciar e a aprovação de escolhas específicas devem ser registradas separadamente, respeitando o alcance da manifestação do usuário.
 
@@ -28,8 +28,8 @@ As decisões da arquitetura serão resolvidas antes das tarefas afetadas, sem pr
 
 | Status | ID | Tarefa pequena | Dependências | Critérios de conclusão |
 | --- | --- | --- | --- | --- |
-| [ ] | T01 | Registrar a autorização para implementar. | Nenhuma. | Autorização expressa recebida e escopo autorizado registrado. Até lá, não executar T02 em diante. |
-| [ ] | T02 | Confirmar organização e contrato da implementação. | T01. | DA-01 resolvida; cinco projetos e diretórios definidos; contrato em português confirmado como referência. Ajustes documentais necessários ficam registrados, sem acrescentar endpoints. |
+| [x] | T01 | Registrar a autorização para implementar. | Nenhuma. | Autorização parcial recebida em 20/10/2026: estrutura, referências e Scalar; demais funcionalidades e deploy não autorizados nesta etapa. |
+| [x] | T02 | Confirmar organização e contrato da implementação. | T01. | DA-01 resolvida para `src/`, `tests/`, cinco projetos e referências da arquitetura. Contrato português preservado como planejado; nenhuma rota de negócio foi criada. |
 | [ ] | T03 | Resolver as escolhas da integração. | T02. | DA-02 a DA-05 resolvidas: superfície da API OpenAI, versão compatível do SDK, modelo, timeout finito, retries e tratamento de recusa/truncamento definidos. Registrar compatibilidade com Structured Outputs, custo e critérios da escolha do modelo. O orçamento total único inclui tentativas e esperas e não é reiniciado por tentativa. |
 | [ ] | T04 | Definir limites operacionais e de entrada. | T02. | DA-06 resolvida: limites de título, conteúdo e corpo, orçamento de saída, concorrência, metas de latência e comportamento de excesso especificados; sem truncamento silencioso. |
 | [ ] | T05 | Aprovar regras de avaliação e conjunto de referência. | T02. | DA-09 resolvida; contagem de palavras aprovada; documentos e resultados esperados definidos para três riscos, múltiplos tipos, `INDETERMINADO`, ausência de pontos de atenção e instruções adversárias. |
@@ -38,9 +38,10 @@ As decisões da arquitetura serão resolvidas antes das tarefas afetadas, sem pr
 
 | Status | ID | Tarefa pequena | Dependências | Critérios de conclusão |
 | --- | --- | --- | --- | --- |
-| [ ] | T06 | Preparar os projetos de produção na solution existente. | T02. | `DocumentAI.API` com ASP.NET Core e Controllers; `DocumentAI.Application`, `DocumentAI.Domain` e `DocumentAI.Infrastructure` como bibliotecas; todos em `net10.0` e incluídos em `DocumentoAI.sln`. Remover endpoints de exemplo dos templates. A solução compila. |
-| [ ] | T07 | Preparar o projeto xUnit. | T06. | `DocumentAI.Tests`, em `net10.0`, incluído na solution; estrutura por camada/categoria definida; dependências do host de teste disponíveis. Projeto compila e o executor de testes é reconhecido, sem teste vazio criado apenas para contagem. |
-| [ ] | T08 | Configurar as referências entre camadas. | T07. | Domain sem referência de projeto; Application → Domain; Infrastructure → Application e Domain; API → Application e Infrastructure; Tests → quatro projetos de produção. Sem ciclos ou referência de produção a Tests; solução compila. |
+| [x] | T06 | Preparar os projetos de produção na solution existente. | T02. | Quatro projetos de produção em `net10.0`, API com `AddControllers`/`MapControllers` e pasta Controllers. WeatherForecast e classes vazias dos templates removidos. Solution preservada; build aprovado. |
+| [x] | T07 | Preparar o projeto xUnit. | T06. | `DocumentAI.Tests` em `net10.0`, com xUnit e host de teste. Teste vazio removido; dois casos reais verificam documentação e ausência de endpoints não implementados em Development e Production. |
+| [x] | T08 | Configurar as referências entre camadas. | T07. | Domain sem referência de projeto; Application → Domain; Infrastructure → Application e Domain; API → Application e Infrastructure; Tests → quatro projetos de produção. Referências conferidas; build aprovado. |
+| [x] | T08A | Configurar OpenAPI e Scalar em DEV e PROD. | T06, T07, T08. | `/scalar/v1` e `/openapi/v1.json` disponíveis nos dois ambientes; guia detalhado incluído no pacote e renderizado na web; dois testes xUnit aprovados. Operações futuras descritas como planejadas, sem rotas fictícias; sem OpenAI ou deploy. |
 
 ## 5. Domínio e aplicação
 
@@ -107,4 +108,22 @@ As decisões da arquitetura serão resolvidas antes das tarefas afetadas, sem pr
 
 Ao concluir uma tarefa, marcar sua caixa e registrar: ID, entrega alterada, verificação realizada, resultado e pendências. Uma tarefa com dependência não atendida ou critério reprovado permanece aberta. Falhas encontradas na homologação retornam à tarefa responsável e exigem nova verificação do comportamento afetado.
 
-Até a autorização solicitada em T01, este plano permanece apenas documental.
+### Entrega de 20/10/2026 — estrutura e documentação web
+
+- T01, T02, T06, T07, T08 e T08A concluídas no escopo parcial autorizado.
+- Projetos: `src/DocumentAI.API`, `src/DocumentAI.Application`, `src/DocumentAI.Domain`, `src/DocumentAI.Infrastructure` e `tests/DocumentAI.Tests`, todos `net10.0`.
+- API registrada para Controllers, sem Controller de negócio ainda; camadas internas contêm somente seus projetos, sem modelos ou serviços antecipados.
+- OpenAPI `Microsoft.AspNetCore.OpenApi` 10.0.9 e Scalar.AspNetCore 2.18.2; Microsoft.OpenApi fixado em 2.7.5 para corrigir o alerta transitivo NU1903 detectado no primeiro restore.
+- `dotnet restore DocumentoAI.sln`: aprovado após liberação de acesso ao NuGet; dependências restauradas sem o alerta de vulnerabilidade inicial.
+- `dotnet build DocumentoAI.sln --no-restore`: aprovado, zero avisos e zero erros.
+- `dotnet test DocumentoAI.sln --no-restore`: 2 aprovados, 0 falhas. Verifica HTML/JavaScript Scalar e JSON OpenAPI em Development e Production; endpoints de análise, health e WeatherForecast retornam `404` nesta etapa.
+- `dotnet publish src/DocumentAI.API/DocumentAI.API.csproj --configuration Release --no-restore --output artifacts/publish`: pacote local gerado; guia incluído e página Scalar renderizada no navegador pelo pacote em Production. Isso não corresponde a deploy e não conclui T27 ou T29.
+- T03 a T05 e tarefas de domínio, serviços, integração, endpoints, erros e publicação permanecem abertas. T25/T25A não foram concluídas: os testes desta entrega cobrem somente a documentação e o escopo inicial.
+- Nenhum `SKILL.md`, workflow demonstrativo ou recurso Azure alterado. Nenhuma credencial ou SDK OpenAI adicionado.
+
+### Entrega de 20/10/2026 — CI e versionamento da estrutura
+
+- Autorizados commit/push da implementação inicial e substituição das mensagens demonstrativas por build e testes reais no GitHub Actions.
+- `.github/workflows/pipeline.yml`: dois jobs em Ubuntu 24.04, com SDK .NET 10 e configuração Release. Tests depende de Build e executa a suíte xUnit sem OpenAI real.
+- Job de Deploy removido expressamente; não há autenticação, publicação ou alteração de recursos Azure. T27 e T29 permanecem abertas.
+- README atualizado para refletir os comandos e o escopo atual da pipeline.

@@ -4,13 +4,19 @@
 
 Proposta de arquitetura baseada em [requirements.md](requirements.md), para uma API corporativa em .NET 10 e ASP.NET Core. A solução utilizará Controllers, Dependency Injection, interfaces, serviços assíncronos, SDK oficial da OpenAI, Structured Outputs e xUnit.
 
-Este documento descreve a estrutura futura. Não cria projetos, classes ou configurações executáveis. As escolhas explicitamente solicitadas e os requisitos existentes são premissas; as decisões adicionais da seção 11 são propostas pendentes de aprovação.
+Este documento descreve a arquitetura alvo. Em 20/10/2026, foi autorizada e criada somente a estrutura dos cinco projetos, suas referências e a documentação OpenAPI/Scalar em Development e Production. Domínio, casos de uso e endpoints de negócio continuam planejados. O estado de execução está em tasks.md; as demais decisões da seção 11 permanecem pendentes.
 
 A solution existente mantém o nome `DocumentoAI.sln`. Os projetos usarão o prefixo `DocumentAI`, conforme solicitado. A aplicação será um único serviço implantável, organizado em camadas, sem banco de dados, filas ou processamento em segundo plano nesta etapa.
 
 ## 2. Organização da solução e responsabilidades
 
 Organização proposta: projetos de produção em `src/`, projeto de testes em `tests/` e documentação em `docs/`. Todos os projetos terão como alvo `net10.0`.
+
+### Documentação web autorizada
+
+OpenAPI e Scalar pertencem exclusivamente à API. `/openapi/v1.json` fornece o contrato gerado e `/scalar/v1` oferece a interface web nos ambientes Development e Production, por solicitação expressa. São rotas técnicas de documentação, sem novos endpoints de negócio. O guia em `docs/api-reference.md` é incluído no output e no pacote de publicação e compõe a descrição OpenAPI.
+
+Operações ainda não implementadas aparecem somente no guia, identificadas como planejadas; não são adicionadas artificialmente ao documento como operações executáveis. Controllers futuros serão descobertos pelo gerador OpenAPI. A documentação não depende de configuração ou chamada OpenAI. A exposição em Production foi autorizada nesta etapa; isso não autoriza publicação no Azure nem resolve as decisões de acesso corporativo.
 
 | Projeto | Responsabilidades | Limites |
 | --- | --- | --- |
@@ -161,11 +167,11 @@ A API será publicada como um serviço sem estado no Azure App Service. Somente 
 
 ## 11. Decisões arquiteturais pendentes de aprovação
 
-Os itens abaixo não são aprovações concedidas. São propostas e definições necessárias para orientar a implementação ou a publicação. Sua pendência não impede a revisão deste documento.
+DA-01 está aprovada no escopo da estrutura inicial, conforme registro abaixo. Os demais itens continuam sendo propostas e definições necessárias para orientar a implementação ou a publicação; não são considerados aprovados pela configuração da documentação web.
 
 | ID | Decisão | Proposta ou definição necessária | Impacto e momento de aprovação |
 | --- | --- | --- | --- |
-| DA-01 | Organização e fronteiras internas | Aprovar `src/` e `tests/`, contratos da Application separados dos DTOs HTTP e referência API → Infrastructure limitada à composição. | Define a estrutura; aprovar antes de criar os projetos. |
+| DA-01 | Organização e fronteiras internas — aprovada para esta etapa | `src/`, `tests/`, cinco projetos e referências definidos nesta arquitetura, com uso da Infrastructure na API limitado à composição. | Autorizada pelo usuário em 20/10/2026; contratos e serviços serão implementados em etapas posteriores. |
 | DA-02 | Superfície da integração OpenAI | Aprovar Responses API sem streaming, utilizando o SDK oficial e schema estrito; fixar versão do pacote após verificar suporte. | Define o adaptador e testes; aprovar antes de implementar a integração. |
 | DA-03 | Modelo e orçamento | Selecionar modelo compatível com Structured Outputs após avaliação do conjunto de referência, custo e latência; não há modelo fixado neste documento. | Define qualidade e custo; aprovar antes de testes reais e homologação. |
 | DA-04 | Timeout e novas tentativas | Definir valor do orçamento total único, incluindo tentativas e esperas, sem reinício por tentativa; proposta inicial sem retries automáticos, inclusive no SDK, e sem reparação de saída. | Afeta latência, disponibilidade e cobrança; aprovar antes de implementar resiliência. |

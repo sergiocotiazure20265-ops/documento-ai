@@ -4,11 +4,33 @@ API corporativa planejada em ASP.NET Core para análise inteligente de documento
 
 ## Estado atual
 
-O repositório contém a solution `DocumentoAI.sln`, a documentação de desenvolvimento orientado a especificações (SDD), as instruções para agentes e três Agent Skills locais. Os cinco projetos .NET ainda não foram criados; não há API executável nem testes automatizados implementados.
+O repositório contém a solution `DocumentoAI.sln`, cinco projetos .NET 10 com referências configuradas, a documentação SDD, instruções para agentes e três Agent Skills locais. O host API já executa a documentação web OpenAPI/Scalar. Dois testes xUnit verificam essa documentação em Development e Production.
 
-O workflow inicial é demonstrativo: Build, Test e Deploy apenas exibem mensagens. Uma execução verde desse workflow não comprova compilação, testes ou publicação da aplicação.
+O workflow executa build e testes reais em Release com .NET 10. A etapa de Deploy foi removida por solicitação do usuário; a pipeline não publica a aplicação.
 
-A implementação da API continua aguardando autorização. A preparação do repositório e do workflow não representa aprovação das decisões arquiteturais pendentes.
+A estrutura e a documentação web foram autorizadas. Endpoints de análise e Health Check, modelos de domínio, serviços e integração OpenAI ainda não foram implementados. A documentação os identifica como contratos planejados. As demais decisões arquiteturais permanecem pendentes.
+
+## Executar a documentação web
+
+Requer SDK .NET 10. Na raiz da solução:
+
+```powershell
+dotnet restore DocumentoAI.sln
+dotnet build DocumentoAI.sln --no-restore
+dotnet test DocumentoAI.sln --no-build --no-restore
+dotnet run --project src/DocumentAI.API --launch-profile http
+```
+
+Abrir [Scalar local](http://localhost:5249/scalar/v1) ou [OpenAPI JSON](http://localhost:5249/openapi/v1.json). O perfil `https` utiliza `https://localhost:7115/scalar/v1` e exige certificado local confiável.
+
+Para executar em Production localmente, sem utilizar o perfil Development:
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT = 'Production'
+dotnet run --project src/DocumentAI.API --no-launch-profile --urls http://localhost:5249
+```
+
+No domínio de produção futuro, as mesmas rotas estarão disponíveis por HTTPS. OpenAPI e Scalar são mapeados em ambos os ambientes; o guia [api-reference.md](docs/api-reference.md) é incluído no pacote da API. Nesta fase, não há operações de negócio no cliente interativo, e `/api/documentos/analisar` e `/health` retornam `404`. Nenhuma chave OpenAI é necessária para iniciar a documentação.
 
 ## Objetivo e funcionalidades previstas
 
@@ -97,22 +119,21 @@ Leia [AGENTS.md](AGENTS.md) e os documentos de SDD antes de implementar. Impleme
 | `OpenAI__Model` | Modelo compatível com Structured Outputs, a aprovar. |
 | `OpenAI__TimeoutSeconds` | Orçamento total finito da integração, a aprovar. |
 
-Não é necessário configurar credenciais para este workflow demonstrativo. A API futura validará as opções na inicialização. Modelo, versão do SDK, limites, retries e ambiente Azure ainda dependem das decisões do SDD.
+Não é necessário configurar credenciais para o workflow de build e testes. A API futura validará as opções de integração na inicialização. Modelo, versão do SDK OpenAI, limites, retries e ambiente Azure ainda dependem das decisões do SDD.
 
 ## Pipeline inicial
 
 O arquivo [pipeline.yml](.github/workflows/pipeline.yml) executa em push para `main`, pull requests destinados a `main` e acionamento manual.
 
-1. **Build:** exibe uma mensagem de teste.
-2. **Test:** aguarda Build e exibe uma mensagem de teste.
-3. **Deploy:** aguarda Test e exibe uma mensagem de teste.
+1. **Build:** checkout, instalação do SDK .NET 10, `dotnet restore DocumentoAI.sln` e `dotnet build DocumentoAI.sln --configuration Release --no-restore`.
+2. **Tests:** aguarda Build, prepara um runner independente, restaura as dependências e executa `dotnet test DocumentoAI.sln --configuration Release --no-restore`, com compilação dos testes e logs detalhados.
 
-Nenhum job compila, executa testes da aplicação, autentica no Azure ou publica recursos. O token tem somente permissão de leitura do conteúdo. A evolução para publicação real deverá incluir validação do pacote, autenticação federada OIDC, configuração do ambiente e autorização de deploy conforme o SDD e as skills.
+Os jobs utilizam Ubuntu 24.04, SDK `10.0.x` e token com permissão somente de leitura do conteúdo. Não há job de Deploy, autenticação no Azure ou publicação de recursos. A evolução para publicação real dependerá de autorização e incluirá validação do pacote, autenticação federada OIDC e configuração do ambiente conforme o SDD e as skills.
 
 ## Desenvolvimento futuro
 
-Após autorização, seguir [tasks.md](docs/tasks.md). A solution pode ser aberta no Visual Studio; atualmente possui itens de documentação e não oferece uma aplicação para iniciar.
+Seguir o escopo autorizado e o estado em [tasks.md](docs/tasks.md). A solution pode ser aberta no Visual Studio; selecionar `DocumentAI.API` como projeto de inicialização. A pasta Controllers está preparada, com os serviços de Controllers registrados; nenhum Controller de negócio foi criado nesta etapa.
 
-Quando os projetos forem implementados, o fluxo de verificação previsto será restauração, build, `dotnet test` e geração do pacote. Testes rotineiros não deverão depender de rede externa ou da OpenAI real; a homologação real será separada e executada com configuração aprovada.
+O fluxo de verificação é restauração, build e `dotnet test`. Um pacote local pode ser gerado com `dotnet publish src/DocumentAI.API -c Release -o artifacts/publish`; a geração não realiza deploy. Os testes atuais não dependem de rede externa ou da OpenAI real; a homologação real será separada e executada com configuração aprovada.
 
 O `.gitignore` exclui estado local do Visual Studio, saídas de compilação/testes e formatos comuns de credenciais. Documentos e `.agents/skills/` são versionados.

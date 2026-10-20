@@ -23,6 +23,10 @@ A rota `/api/documentos/analisar` e os campos em português substituíram o cont
 
 Não estão previstos endpoints adicionais, upload de arquivos, OCR, armazenamento, consulta de histórico ou processamento em segundo plano.
 
+### Estado implementado — estrutura e documentação
+
+Em 20/10/2026, o usuário autorizou a estrutura dos projetos e a documentação web. As rotas técnicas `/scalar/v1` e `/openapi/v1.json` estão disponíveis em Development e Production, sem implementação de operações de negócio. O guia `api-reference.md`, incluído no pacote da API, descreve os contratos abaixo como planejados. Por enquanto, o POST de análise e o GET de saúde retornam `404`; os critérios e cenários de negócio deste documento serão aplicados nas etapas futuras. Os dois testes xUnit atuais verificam somente documentação e ausência de rotas antecipadas, sem comprovar os critérios de negócio.
+
 ## 2. POST /api/documentos/analisar
 
 ### 2.1. Comportamento

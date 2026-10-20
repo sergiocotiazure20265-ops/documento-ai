@@ -1,4 +1,4 @@
-name: Pipeline demonstrativo
+name: Build e Tests
 
 on:
   push:
@@ -10,29 +10,50 @@ on:
 permissions:
   contents: read
 
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
 jobs:
   build:
-    name: Build (demonstrativo)
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    name: Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore DocumentoAI.sln
+
       - name: Build
-        run: echo "Teste de build - compilacao real sera configurada futuramente."
+        run: dotnet build DocumentoAI.sln --configuration Release --no-restore
 
   test:
-    name: Test (demonstrativo)
+    name: Tests
     needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - name: Test
-        run: echo "Teste de pipeline - testes automatizados serao configurados futuramente."
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
-  deploy:
-    name: Deploy (demonstrativo)
-    needs: test
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Deploy
-        run: echo "Teste de deploy - nenhuma publicacao ou alteracao no Azure sera realizada."
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore DocumentoAI.sln
+
+      - name: Tests
+        run: dotnet test DocumentoAI.sln --configuration Release --no-restore --logger "console;verbosity=normal"

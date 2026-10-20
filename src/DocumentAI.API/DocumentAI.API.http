@@ -1,0 +1,9 @@
+@DocumentAI.API_HostAddress = http://localhost:5249
+
+### Documento OpenAPI disponível nesta etapa
+GET {{DocumentAI.API_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+### Interface web Scalar
+GET {{DocumentAI.API_HostAddress}}/scalar/v1
+Accept: text/html

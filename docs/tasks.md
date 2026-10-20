@@ -136,3 +136,4 @@ Ao concluir uma tarefa, marcar sua caixa e registrar: ID, entrega alterada, veri
 - Credencial necessária: Repository secret `SMTP_PASSWORD` com senha de app do Gmail. O envio real permanece dependente de seu cadastro e verificação; os testes não usam senha real nem enviam e-mails.
 - Quatro testes Python locais aprovados: resultados de execução/passos, ausência de credencial, transporte SMTP simulado e paginação por tentativa. A suíte passou a ser executada também no job Tests.
 - Deploy continua ausente e as tarefas de implementação da integração OpenAI permanecem abertas.
+- Usuário confirmou cadastro de `SMTP_PASSWORD`. A nova tentativa identificou desconexão SMTP; o envio passou a usar STARTTLS obrigatório na porta 587, com alternativa TLS 465 somente antes do envio. Diagnóstico por etapa sem expor respostas de autenticação. Sete testes Python aprovados, incluindo desconexão após aceite e prevenção de envio duplicado.

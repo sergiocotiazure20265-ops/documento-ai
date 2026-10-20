@@ -33,19 +33,44 @@ class PipelineReportTests(unittest.TestCase):
                 self.assertIn("actions/runs/123", body)
 
     def test_missing_password_does_not_connect_to_smtp(self):
-        with patch.object(report.smtplib, "SMTP_SSL") as smtp:
+        with patch.object(report.smtplib, "SMTP") as smtp:
             with self.assertRaises(ValueError):
                 report.send_message(report.build_message("owner/repo", self.run_data(), []), "")
             smtp.assert_not_called()
 
     def test_uses_gmail_tls_and_configured_recipient(self):
         message = report.build_message("owner/repo", self.run_data(), [])
-        with patch.object(report.smtplib, "SMTP_SSL") as smtp:
+        with patch.object(report.smtplib, "SMTP") as smtp:
             report.send_message(message, "fake-test-secret")
-            self.assertEqual(("smtp.gmail.com", 465), smtp.call_args.args)
-            client = smtp.return_value.__enter__.return_value
+            self.assertEqual(("smtp.gmail.com", 587), smtp.call_args.args)
+            client = smtp.return_value
+            client.starttls.assert_called_once()
             client.login.assert_called_once_with(report.MAILBOX, "fake-test-secret")
             client.send_message.assert_called_once_with(message)
+
+    def test_retries_connection_on_ssl_port_before_sending(self):
+        message = report.build_message("owner/repo", self.run_data(), [])
+        with patch.object(report.smtplib, "SMTP", side_effect=report.smtplib.SMTPServerDisconnected), \
+             patch.object(report.smtplib, "SMTP_SSL") as smtp:
+            report.send_message(message, "fake-test-secret")
+            self.assertEqual(("smtp.gmail.com", 465), smtp.call_args.args)
+            smtp.return_value.send_message.assert_called_once_with(message)
+
+    def test_quit_disconnection_does_not_repeat_accepted_email(self):
+        message = report.build_message("owner/repo", self.run_data(), [])
+        with patch.object(report.smtplib, "SMTP") as smtp:
+            smtp.return_value.quit.side_effect = report.smtplib.SMTPServerDisconnected
+            report.send_message(message, "fake-test-secret")
+            smtp.return_value.send_message.assert_called_once_with(message)
+
+    def test_does_not_retry_ambiguous_send(self):
+        message = report.build_message("owner/repo", self.run_data(), [])
+        with patch.object(report.smtplib, "SMTP") as smtp, \
+             patch.object(report.smtplib, "SMTP_SSL") as fallback:
+            smtp.return_value.send_message.side_effect = report.smtplib.SMTPServerDisconnected
+            with self.assertRaises(report.smtplib.SMTPServerDisconnected):
+                report.send_message(message, "fake-test-secret")
+            fallback.assert_not_called()
 
     def test_fetches_pages_for_exact_run_attempt(self):
         first = MagicMock()

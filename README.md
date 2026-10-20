@@ -135,7 +135,7 @@ Os jobs utilizam Ubuntu 24.04, SDK `10.0.x` e token com permissão somente de le
 
 O workflow [email-report.yml](.github/workflows/email-report.yml) é a etapa final de notificação: recebe o evento `workflow_run` quando **Build e Tests** termina, com sucesso, falha ou cancelamento. Também acompanha novas tentativas da execução e os eventos de push, pull request e acionamento manual cobertos pela pipeline. Seu gatilho observa somente Build e Tests, evitando notificações recursivas sobre o próprio envio.
 
-Remetente e destinatário: **sergio.coti@gmail.com**. O envio utiliza `smtp.gmail.com:465` com TLS validado. O corpo inclui resultado geral, workflow, repositório, evento, branch, commit, responsável, horários UTC, tentativa, resultado/duração de cada job e passo, comandos de restore/build/test e links dos logs. Passos ignorados e cancelados são identificados. Logs brutos e segredos não são enviados; a saída completa dos testes fica nos links da execução.
+Remetente e destinatário: **sergio.coti@gmail.com**. O envio utiliza `smtp.gmail.com:587` com STARTTLS obrigatório e certificado validado. Em falha de conexão anterior ao envio, tenta a porta 465 com TLS implícito. O comando de envio não é repetido automaticamente para evitar duplicatas em caso de confirmação ambígua. O corpo inclui resultado geral, workflow, repositório, evento, branch, commit, responsável, horários UTC, tentativa, resultado/duração de cada job e passo, comandos de restore/build/test e links dos logs. Passos ignorados e cancelados são identificados. Logs brutos e segredos não são enviados; a saída completa dos testes fica nos links da execução.
 
 Para ativar o envio:
 

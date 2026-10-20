@@ -108,10 +108,42 @@ def build_message(repository, run, jobs):
 def send_message(message, password):
     if not password:
         raise ValueError("Cadastre a senha de app do Gmail em Actions Secret SMTP_PASSWORD.")
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30,
-                          context=ssl.create_default_context()) as client:
-        client.login(MAILBOX, password)
+    context = ssl.create_default_context()
+    client = None
+    for port in (587, 465):
+        try:
+            print(f"SMTP: conectando com TLS na porta {port}.", flush=True)
+            if port == 587:
+                client = smtplib.SMTP("smtp.gmail.com", port, timeout=30)
+                client.ehlo()
+                client.starttls(context=context)
+                client.ehlo()
+            else:
+                client = smtplib.SMTP_SSL("smtp.gmail.com", port, timeout=30, context=context)
+            print("SMTP: autenticando remetente.", flush=True)
+            client.login(MAILBOX, password)
+            break
+        except (smtplib.SMTPServerDisconnected, OSError) as error:
+            if client is not None:
+                client.close()
+                client = None
+            print(f"SMTP: falha antes do envio na porta {port} ({type(error).__name__}).", flush=True)
+            if port == 465:
+                raise
+        except smtplib.SMTPException:
+            if client is not None:
+                client.close()
+            raise
+    try:
+        print("SMTP: enviando relatorio.", flush=True)
         client.send_message(message)
+    finally:
+        # Nunca repetir o envio: uma desconexao apos DATA pode ter resultado ambiguo.
+        # Falha em QUIT nao deve ocultar um envio ja aceito pelo servidor.
+        try:
+            client.quit()
+        except (smtplib.SMTPException, OSError):
+            client.close()
 
 
 def main():
